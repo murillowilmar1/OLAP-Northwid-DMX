@@ -1,0 +1,468 @@
+
+SELECT [Measures].[Total_Sales] ON 0 
+FROM [DM Northwid]
+
+
+SELECT [Measures].[Quantity] ON 0 
+FROM [DM Northwid]
+
+
+SELECT {[Measures].[Quantity], 
+         [Measures].[Total_Sales]} ON 0 
+		 FROM [DM Northwid]
+
+
+--- CANTIDAD DE PRODUCTO 
+SELECT {[Measures].[Quantity]} ON COLUMNS,
+	([Dim Product].[Product Name].[Product Name]) ON ROWS
+FROM [DM Northwid];
+
+
+SELECT {[Measures].[Quantity]} ON COLUMNS,
+	NONEMPTY([Dim Product].[Product Name].[Product Name]) ON ROWS
+FROM [DM Northwid];
+
+
+---- ORDENES POR AÑO 
+
+SELECT  [Measures].[Quantity] ON COLUMNS,
+	NONEMPTY ([Dim Time].[Año].[Año]) ON ROWS
+FROM  [DM Northwid];
+
+
+---CANTIDAD DE ORDENES POR AÑO Y PRODUCTO 
+
+SELECT NON EMPTY {([Measures].[Quantity],
+	[Dim Time].[Año].[Año])} ON COLUMNS,
+	NON EMPTY [Dim Product].[Product Name].[Product Name] ON ROWS
+FROM [DM Northwid];
+
+--- CANTIDAD DE ÓRDENES PARA EL AÑO 1997
+SELECT [Measures].[Quantity] ON COLUMNS,
+	[Dim Time].[Año].&[1997-01-01T00:00:00] ON ROWS
+FROM [DM Northwid];
+
+SELECT [Measures].[Quantity] ON COLUMNS
+FROM [DM Northwid]
+WHERE [Dim Time].[Año].&[1997-01-01T00:00:00]
+
+
+
+
+
+--CANTIDAD DE ÓRDENES PARA EL AÑO 1997, POR CATEGIRIA Y UNIDADES EN STOCK DE PRODUCTO:
+
+
+SELECT [Measures].[Quantity] ON COLUMNS,
+	([Dim Product].[Product Name].[Product Name],
+	[Dim Product].[Units In Stock].[Units In Stock]) ON ROWS
+FROM [DM Northwid]
+WHERE  [Dim Time].[Año].&[1997-01-01T00:00:00];
+
+
+
+
+---CANTIDAD DE ÓRDENES PARA EL AÑO 1997 Y 1998, POR CATEGORÍA Y UNIDADES EN STOCK DEL  PRODUCTO:
+SELECT  ([Measures].[Quantity],
+	[Dim Time].[Año].[Año]) ON COLUMNS,
+	([Dim Product].[Product Name].[Product Name],
+	[Dim Product].[Units In Stock].[Units In Stock]) ON ROWS
+FROM
+	(SELECT {[Dim Time].[Año].&[1997-01-01T00:00:00],
+		[Dim Time].[Año].&[1998-01-01T00:00:00]} ON COLUMNS
+	FROM [DM Northwid])
+
+
+--SUPONGA QUE QUEREMOS AQUELLOS PRODUCTOS DEL AÑO 2014
+--Y CUYO VENTA HAYA SIDO SUPERIOR A 5000
+
+SELECT [MEASURES].[TOTAL_SALES] ON 0, 
+FILTER ([DIM PRODUCT].[PRODUCT NAME].[PRODUCT NAME], 
+	  [MEASURES].[TOTAL_SALES] > 1000) ON 1 
+	  FROM  [DM NORTHWID]
+	  WHERE [DIM TIME].[AÑO].&[1998-01-01T00:00:00]
+
+
+
+--FILTRAR POR NOMBRE    28  Pendiente 
+
+SELECT[MEASURES].[TOTAL_SALES] ON COLUMNS,
+FILTER ([DIM PRODUCT].[PRODUCT NAME].[PRODUCT NAME],
+	([MEASURES].[TOTAL_SALES]>5000 AND 
+	LEFT([[DIM PRODUCT].[PRODUCT NAME].CURRENTMEMBER.NAME,2)="CH")
+		) ON ROWS
+FROM [DM NORTHWID]
+WHERE [DIM TIME].[AÑO].&[1998-01-01T00:00:00];
+
+
+--CANTIDAD DE ÓRDENES, POR AÑO Y MES, DE TODAS LOS NOMBRES  DE PRODUCTO, EXCEPTO IKURA
+
+SELECT
+NON EMPTY (([DIM TIME].[MES].[MES])) 
+	ON COLUMNS,
+(EXCEPT (
+	 [DIM PRODUCT].[PRODUCT NAME].[PRODUCT NAME], 
+	{[DIM PRODUCT].[PRODUCT NAME].[PRODUCT NAME].&[IKURA]})) 	
+	ON ROWS
+FROM [DM NORTHWID]
+WHERE ([MEASURES].[QUANTITY]);
+
+
+--CANTIDAD DE ÓRDENES, POR AÑO Y MES, DE TODAS LAS CATEGORÍAS DE PRODUCTO, EXCEPTO SEAFOOD
+
+SELECT
+NON EMPTY (([DIM TIME].[MES].[MES])) 
+	ON COLUMNS,
+(EXCEPT (
+	 [DIM CATEGORIES].[CATEGORY NAME].[CATEGORY NAME], 
+	{[DIM CATEGORIES].[CATEGORY NAME].&[SEAFOOD]})) 	
+	ON ROWS
+FROM [DM NORTHWID]
+WHERE ([MEASURES].[QUANTITY]);
+
+
+
+
+---VENTAS DEL AÑO 1996 POR PRODUCTO, ORDENANDO DESCENDENTEMENTE SEGÚN LA VENTA.
+
+SELECT [MEASURES].[TOTAL_SALES] ON COLUMNS,
+ORDER([DIM PRODUCT].[PRODUCT NAME].[PRODUCT NAME],
+	  [MEASURES].[TOTAL_SALES] ,
+	DESC) ON ROWS
+FROM [DM NORTHWID]
+WHERE  [DIM TIME].[AÑO].&[1996-01-01T00:00:00]
+
+
+----CONSULTA
+WITH 
+MEMBER  MEDIDAS AS COUNT ([MEASURES].MEMBERS)
+SELECT MEDIDAS ON COLUMNS 
+FROM [DM NORTHWID]
+
+----CONSULTA
+
+
+SELECT  [MEASURES].[TOTAL_SALES]
+	ON 0,
+	NON EMPTY [DIM TIME].[AÑO].MEMBERS 
+	ON 1
+FROM  [DM NORTHWID];
+
+----CONSULTA
+
+WITH MEMBER NONNULLSSALES AS
+	COALESCEEMPTY([Measures].[Total_Sales],0)
+
+SELECT	NONNULLSSALES ON 0,
+	 [DIM TIME].[AÑO].[AÑO] ON 1
+FROM [DM NORTHWID];
+
+
+---11
+
+SELECT { [Measures].[Total_Sales]} ON 0,
+CROSSJOIN(
+	{[Dim Customer].[Company Name].&[Bon app'], 
+	 [Dim Customer].[Company Name].&[Bottom-Dollar Markets]}
+	,
+	{[Dim Customer].[Country].&[Canada],
+	 [Dim Customer].[Country].&[France]}	) 
+	ON 1
+FROM [DM Northwid] 
+
+---ParallelPeriod
+SELECT
+   ParallelPeriod (
+	   [Dim Time].[Año].[Año] 
+	, 1
+	, [Dim Time].[Año].&[1997-01-01T00:00:00])
+	ON 0
+FROM [DM Northwid]
+WHERE [Measures].[Total_Sales]
+
+
+-----MOSTRAR LAS VENTAS DEL MES DE JUNIO EN EL AÑO 1997
+
+SELECT
+	[Measures].[Total_Sales] ON 0,
+     [Dim Time].[Mes].&[1997-06-01T00:00:00]  ON 1
+FROM [DM Northwid]
+
+
+----CONSULTA
+
+SELECT
+	[Measures].[Total_Sales] ON COLUMNS,
+	StrToMember("[Dim Time].[Mes].&[1997-05-01T00:00:00]&["
+	+ Format(NOW(), "MM") +"]") ON ROWS
+FROM [DM Northwid]
+
+----CONSULTA
+WITH MEMBER [Measures].IIFSales AS
+	IIF([Measures].[Total_Sales]>10000000,
+	"Ventas Altas", "Ventas Bajas")
+
+SELECT {[Measures].[Total_Sales],
+	[Measures].IIFSales} ON 0,
+	[Dim Time].[Año]. ON 1
+FROM [DM Northwid];
+
+----CONSULTA 
+WITH MEMBER 
+[Measures].CLASS_Reseller AS
+IIF([Measures].[Total_Sales]>200000, "Bueno",
+IIF([Measures].[Total_Sales]>100000, "Medio", "Malo"))
+
+SELECT{[Measures].CLASS_Reseller,
+	[Measures].[Total_Sales]} ON 0,
+ORDER(
+FILTER([Dim Employee].[First Name].[First Name],
+NOT IsEmpty([Measures].[Total_Sales])),
+[Measures].[Total_Sales], desc) ON 1
+FROM [DM Northwid]
+WHERE [Dim Time].[Año].&[1998-01-01T00:00:00];
+
+
+-----CONSULTA 
+
+
+WITH MEMBER
+[Measures].[Adjusted_Total_Sales] AS
+	IIF([Dim Time].[Año -  Semestre -  Trimestre -  Mes -  Fecha].[Año] IS 
+		[Dim Time].[Año -  Semestre -  Trimestre -  Mes -  Fecha].[Año].&[1996-01-01T00:00:00],
+		[Measures].[Total_Sales],
+		[Measures].[Total_Sales]* .8), 
+		FORMAT_STRING="$ #,##0.00;-$ #,##0.00"
+
+
+Select {[Measures].[Total_Sales], [Measures].[Adjusted_Total_Sales]} ON 0,
+NON EMPTY [Dim Time].[Año -  Semestre -  Trimestre -  Mes -  Fecha].[Año] ON 1
+FROM [DM Northwid]
+
+
+--CONSULTA 
+
+
+WITH MEMBER [Measures].[Quantity_1] AS   
+CASE   
+   WHEN [Measures].[Quantity] > 30000 THEN 'Excelente'  
+   WHEN [Measures].[Quantity] > 5000 THEN 'Buena'  
+   WHEN [Measures].[Quantity] > 1000 THEN 'Media'  
+   WHEN [Measures].[Quantity] > 0 THEN 'Baja'  
+   ELSE NULL  
+END  
+SELECT Non empty [Dim Time].[Año].[Año] on 0,  
+Nonempty( [Dim Employee].[First Name].[First Name]) on 1  
+FROM  [DM Northwid]
+WHERE [Measures].[Quantity_1] 
+
+
+--- CONSULTA 
+
+WITH MEMBER 
+Measures.SalesPerYear AS
+([Dim Time].[Año].CURRENTMEMBER,
+[Measures].[Total_Sales]), FORMAT_STRING="CURRENCY"
+
+SELECT Measures.SalesPerYear ON 0,
+	NON EMPTY [Dim Time].[Año].CHILDREN ON 1
+FROM [DM Northwid];
+
+
+----CONSULTA
+
+WITH MEMBER Measures.SalesLastYear AS
+(ParallelPeriod 
+([Dim Time].[Año].[Año], 
+1, 
+[Dim Time].[Año].CURRENTMEMBER),
+[Measures].[Total_Sales]), FORMAT_STRING="CURRENCY"
+
+SELECT {[Measures].[Total_Sales],Measures.SalesLastYear} ON 0,
+	NON EMPTY  [Dim Time].[Año].CHILDREN ON 1
+FROM [DM Northwid];
+
+
+---CONSULTA 
+
+WITH MEMBER [Measures].[SalesDiff] AS
+([Dim Time].[Año].CURRENTMEMBER,
+[Measures].[Total_Sales]) 
+-
+(ParallelPeriod 
+	([Dim Time].[Año].[Año], 
+	1, 
+[Dim Time].[Año].CURRENTMEMBER)
+,[Measures].[Total_Sales]), FORMAT_STRING="CURRENCY"
+
+SELECT  {[Measures].[Total_Sales], [Measures].[SalesDiff]} ON 0,
+	NON EMPTY  [Dim Time].[Año].children ON 1
+FROM [DM Northwid];
+
+
+---- CONSULTA 
+
+
+WITH MEMBER [Measures].[SalesDiff] AS
+([Dim Time].[Año].CURRENTMEMBER,
+[Measures].[Total_Sales]) 
+-
+([Dim Time].[Año].CURRENTMEMBER.PREVMEMBER,
+[Measures].[Total_Sales]),
+FORMAT_STRING="CURRENCY"
+
+SELECT  
+{[Measures].[Total_Sales], [Measures].[SalesDiff]} ON 0,
+NON EMPTY [Dim Time].[Año].children ON 1
+FROM [DM Northwid]
+
+
+---CONSULTA
+
+WITH MEMBER [Measures].[SalesDiff] AS
+	([Dim Time].[Año -  Semestre -  Trimestre -  Mes -  Fecha].CURRENTMEMBER,
+	[Measures].[Total_Sales]) 
+	-
+	(ParallelPeriod (
+	 [Dim Time].[Año -  Semestre -  Trimestre -  Mes -  Fecha].[Año], 1, 
+	[Dim Time].[Año -  Semestre -  Trimestre -  Mes -  Fecha].CURRENTMEMBER)
+	,[Measures].[Total_Sales]), 	FORMAT_STRING="CURRENCY"
+SELECT  {[Measures].[Total_Sales], 	[Measures].[SalesDiff]} ON 0,
+	NON EMPTY [Dim Time].[Año -  Semestre -  Trimestre -  Mes -  Fecha].[Año]ON 1
+FROM [DM Northwid];
+
+--CONSULTA 
+
+
+
+WITH MEMBER [Measures].[SalesDiff] AS
+	([Dim Time].[Año -  Semestre -  Trimestre -  Mes -  Fecha].CURRENTMEMBER,
+	[Measures].[Total_Sales]) 
+	-
+	(ParallelPeriod (
+	 [Dim Time].[Año -  Semestre -  Trimestre -  Mes -  Fecha].CURRENTMEMBER.LEVEL
+	 , 1, 
+	[Dim Time].[Año -  Semestre -  Trimestre -  Mes -  Fecha].CURRENTMEMBER)
+	,[Measures].[Total_Sales]), 
+	FORMAT_STRING="CURRENCY"
+
+SELECT  {[Measures].[Total_Sales], 	[Measures].[SalesDiff]} ON 0,
+	NON EMPTY [Dim Time].[Año -  Semestre -  Trimestre -  Mes -  Fecha].MEMBERS ON 1
+FROM [DM Northwid];
+
+
+---CONSULTA 
+
+
+SELECT 
+[Measures].[Total_Sales]
+ON COLUMNS,
+
+PARALLELPERIOD (
+[Dim Time].[Año].[Año],
+2, 
+[Dim Time].[Año].&[1998-01-01T00:00:00] 
+): [Dim Time].[Año].&[1998-01-01T00:00:00]  ON ROWS
+FROM [DM Northwid]
+
+
+
+---CONSULTA 
+SELECT 
+PERIODSTODATE(
+[Dim Time].[Año -  Semestre -  Trimestre -  Mes -  Fecha].[Año],
+[Dim Time].[Año -  Semestre -  Trimestre -  Mes -  Fecha].[Trimestre].&[1997-07-01T00:00:00]) ON 0
+FROM[DM Northwid]
+WHERE[Measures].[Total_Sales]
+
+
+
+
+---CONSULTA 
+
+SELECT 
+PERIODSTODATE(
+[Dim Time].[Año -  Semestre -  Trimestre -  Mes -  Fecha].[Año],
+[Dim Time].[Año -  Semestre -  Trimestre -  Mes -  Fecha].[Mes].&[1998-05-01T00:00:00]) ON 0
+FROM[DM Northwid]
+WHERE[Measures].[Total_Sales]
+
+
+
+---CONSULTA 
+
+SELECT 
+PERIODSTODATE(
+[Dim Time].[Año -  Semestre -  Trimestre -  Mes -  Fecha].[Trimestre],
+[Dim Time].[Año -  Semestre -  Trimestre -  Mes -  Fecha].[Mes].&[1997-06-01T00:00:00]) ON 0
+FROM[DM Northwid]
+WHERE[Measures].[Total_Sales]
+
+
+
+
+---CONSULTA 
+
+WITH MEMBER [Dim Time].[Año -  Semestre -  Trimestre -  Mes -  Fecha].[1997_sixMonth] AS
+AGGREGATE(
+PERIODSTODATE(
+[Dim Time].[Año -  Semestre -  Trimestre -  Mes -  Fecha].[Año],
+[Dim Time].[Año -  Semestre -  Trimestre -  Mes -  Fecha].[Mes].&[1997-06-01T00:00:00])
+	)
+
+SELECT	 [Dim Time].[Año -  Semestre -  Trimestre -  Mes -  Fecha].[1997_sixMonth] ON 0
+FROM	[DM Northwid]
+WHERE	[Measures].[Total_Sales]
+
+
+---CONSULTA 
+
+WITH MEMBER [Measures].[Acumulated Total Sales] AS
+SUM(
+PERIODSTODATE(
+[Dim Time].[año].[(ALL)],
+[Dim Time].[año].CURRENTMEMBER),
+[Measures].[Total_Sales]
+)
+
+SELECT	
+{[Measures].[Total_Sales], 
+[Measures].[Acumulated Total Sales]} ON 0,
+NON EMPTY {[Dim Time].[Año].[Año].members} ON 1
+FROM [DM Northwid]
+
+
+
+
+---CONSULTA 
+
+With Member [Measures].[YTD] as
+SUM(
+YTD ([Dim Time].[Año].CurrentMember),
+   [Measures].[Total_Sales]
+   )
+
+Select 
+  { [Measures].[Total_Sales],
+  [Measures].[YTD]} on Columns,
+Non empty 
+   [Dim Time].[Trimestre].[Trimestre] on Rows
+From  [DM Northwid]
+
+
+
+---CONSULTA 
+
+WITH MEMBER 
+[Measures].[AvgDailyOrder] AS
+AVG(
+Descendants
+([Dim Time].[Año -  Semestre -  Trimestre -  Mes -  Fecha].CurrentMember, 
+         [Dim Time].[Año -  Semestre -  Trimestre -  Mes -  Fecha].[Mes],AFTER), 
+             [Measures].[Quantity])
+
+SELECT [Measures].[AvgDailyOrder] ON 0,
+	        [Dim Time].[Año -  Semestre -  Trimestre -  Mes -  Fecha].[Mes]ON 1
+FROM [DM Northwid]
+WHERE [Dim Time].[Año].&[1996-01-01T00:00:00];
+
