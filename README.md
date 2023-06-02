@@ -9,6 +9,8 @@
 
 - DM_Northwid --- Contiene archivo Sln de visual con el cubo y los paquetes de extraccion y carga 
 
+-  SQL_Queries --- Contiene archivo DMX con las consultas 
+
 - DMX_Queries --- Contiene archivo DMX con las consultas 
 
 - Trabajo_1_DMX.xlsx---- Contiene la estructura del proyecto 
