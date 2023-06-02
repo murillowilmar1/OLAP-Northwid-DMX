@@ -1,0 +1,27 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.33529.398
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{159641D6-6404-4A2A-AE62-294DE0FE8301}") = "DM_Northwid_Sln", "DM_Northwid_Sln\DM_Northwid_Sln.dtproj", "{00FCF88B-CF39-4A68-91F6-BBF1D84F750A}"
+EndProject
+Project("{D2ABAB84-BF74-430A-B69E-9DC6D40DDA17}") = "DM_Northwid_Cube", "DM_Northwid_Cube\DM_Northwid_Cube.dwproj", "{B5754870-7443-4D23-BB2E-27395288CF9D}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Development|Default = Development|Default
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{00FCF88B-CF39-4A68-91F6-BBF1D84F750A}.Development|Default.ActiveCfg = Development
+		{00FCF88B-CF39-4A68-91F6-BBF1D84F750A}.Development|Default.Build.0 = Development
+		{B5754870-7443-4D23-BB2E-27395288CF9D}.Development|Default.ActiveCfg = Development
+		{B5754870-7443-4D23-BB2E-27395288CF9D}.Development|Default.Build.0 = Development
+		{B5754870-7443-4D23-BB2E-27395288CF9D}.Development|Default.Deploy.0 = Development
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {5C705A72-0F16-45A7-B38B-7E7457834826}
+	EndGlobalSection
+EndGlobal
