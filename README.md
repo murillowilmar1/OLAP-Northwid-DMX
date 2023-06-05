@@ -13,4 +13,4 @@
 
 - DMX_Queries --- Contiene archivo DMX con las consultas 
 
-- Trabajo_1_DMX.xlsx---- Contiene la estructura del proyecto 
+- OLAP_CUBE_CONTENT.xlsx---- Contiene la estructura del proyecto 
