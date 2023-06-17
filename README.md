@@ -1,4 +1,4 @@
-# OLAP-Northwid-DMX
+# OLAP-Northwid-MDX
 
 
 # Carpetas del proyecto 
